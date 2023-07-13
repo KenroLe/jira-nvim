@@ -1,10 +1,10 @@
-local jira_api = require("jira_api")
+local jira_api = require("jira-api")
 local M = {}
 M.test = function()
 	-- We save handle to window from which we open the navigation
 	local start_win = vim.api.nvim_get_current_win()
 
-	vim.api.nvim_command("botright vnew") -- We open a new vertical window at the far right
+	vim.api.nvim_command("botright vnew")     -- We open a new vertical window at the far right
 	local win = vim.api.nvim_get_current_win() -- We save our navigation window handle...
 	local buf = vim.api.nvim_get_current_buf() -- ...and it's buffer handle.
 
