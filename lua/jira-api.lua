@@ -22,4 +22,12 @@ M.jql_req = function(opts)
 	})
 	return json.decode(res.body)
 end
+M.get_issue_by_key = function(key, opts)
+	opts.jql = "key=" .. key
+	return M.jql_req(opts)
+end
+M.get_issue_by_text = function(text, opts)
+	opts.jql = "text~" .. text
+	return M.jql_req(opts)
+end
 return M

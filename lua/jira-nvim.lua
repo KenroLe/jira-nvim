@@ -1,46 +1,21 @@
 local jira_api = require("jira-api")
+local buf_util = require("buffer-util")
 local M = {}
-M.test = function()
-	-- We save handle to window from which we open the navigation
-	local start_win = vim.api.nvim_get_current_win()
-
-	vim.api.nvim_command("botright vnew")     -- We open a new vertical window at the far right
-	local win = vim.api.nvim_get_current_win() -- We save our navigation window handle...
-	local buf = vim.api.nvim_get_current_buf() -- ...and it's buffer handle.
-
-	-- We should name our buffer. All buffers in vim must have unique names.
-	-- The easiest solution will be adding buffer handle to it
-	-- because it is already unique and it's just a number.
-	vim.api.nvim_buf_set_name(buf, "Notex" .. buf)
-
-	-- Now we set some options for our buffer.
-	-- nofile prevent mark buffer as modified so we never get warnings about not saved changes.
-	-- Also some plugins treat nofile buffers different.
-	-- For example coc.nvim don't triggers aoutcompletation for these.
-	vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
-	-- We do not need swapfile for this buffer.
-	vim.api.nvim_buf_set_option(buf, "swapfile", false)
-	-- And we would rather prefer that this buffer will be destroyed when hide.
-	vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
-	-- It's not necessary but it is good practice to set custom filetype.
-	-- This allows users to create their own autocommand or colorschemes on filetype.
-	-- and prevent collisions with other plugins.
-	vim.api.nvim_buf_set_option(buf, "filetype", "jql_result")
-	-- For better UX we will turn off line wrap and turn on current line highlight.
-	vim.api.nvim_win_set_option(win, "wrap", false)
-	vim.api.nvim_win_set_option(win, "cursorline", true)
-
+M.init = function()
 	local token = os.getenv("jira_api_token")
 	local email = os.getenv("jira_email")
 	local url = os.getenv("jira_url")
-	local opts = {
+	M.opts = {
 		url = url,
 		email = email,
 		api_key = token,
 		fields = "summary",
 	}
+end
+M.test = function()
+	buf = buf_util.create_buf()
 	-- Query for data,
-	local result = jira_api.jql_req(opts)
+	local result = jira_api.jql_req(M.opts)
 	-- loop through and insert data into buf_lines
 	local buf_lines = {}
 	for _, issue in pairs(result.issues) do
@@ -48,5 +23,38 @@ M.test = function()
 	end
 	-- write buf_lines into buffer
 	vim.api.nvim_buf_set_lines(buf, 0, 0, false, buf_lines)
+end
+M.get_issue_by_key = function(key)
+	if key == nil then
+		print("arg is nill!")
+		return
+	end
+	local buf = buf_util.create_buf()
+	local result = jira_api.get_issue_by_key(key, M.opts)
+	local buf_lines = M.issues_to_buf_line_table(result.issues)
+	-- write buf_lines into buffer
+	vim.api.nvim_buf_set_lines(buf, 0, 0, false, buf_lines)
+end
+M.get_issue_by_text = function(text)
+	if text == nil then
+		print("arg is nill!")
+		return
+	end
+	local buf = buf_util.create_buf()
+	local result = jira_api.get_issue_by_text(text, M.opts)
+	local buf_lines = M.issues_to_buf_line_table(result.issues)
+	-- write buf_lines into buffer
+	vim.api.nvim_buf_set_lines(buf, 0, 0, false, buf_lines)
+end
+M.issues_to_buf_line_table = function(issues)
+	local buf_lines = {}
+	if issues and issues[1] then
+		for _, issue in pairs(issues) do
+			table.insert(buf_lines, issue.key .. " " .. issue.fields.summary)
+		end
+	else
+		table.insert(buf_lines, "No issues found!")
+	end
+	return buf_lines
 end
 return M
