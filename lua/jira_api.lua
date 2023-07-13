@@ -10,7 +10,7 @@ local M = {}
 --    jql = string (optional),
 -- }
 M.jql_req = function(opts)
-	auth = opts.email .. ":" .. opts.api_key
+	local auth = opts.email .. ":" .. opts.api_key
 	if opts.jql == nil then
 		opts.jql = ""
 	end
