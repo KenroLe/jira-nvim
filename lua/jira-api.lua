@@ -19,6 +19,7 @@ M.jql_req = function(opts)
 		url = opts.url .. "/rest/api/3/search?fields=" .. opts.fields .. "&jql=" .. opts.jql,
 		accept = "application/json",
 		auth = auth,
+		output = opts.output,
 	})
 	return json.decode(res.body)
 end
@@ -27,7 +28,10 @@ M.get_issue_by_key = function(key, opts)
 	return M.jql_req(opts)
 end
 M.get_issue_by_text = function(text, opts)
-	opts.jql = "text~" .. text
+	if opts.jql == nil then
+		opts.jql = ""
+	end
+	opts.jql = opts.jql .. "text~" .. text
 	return M.jql_req(opts)
 end
 return M

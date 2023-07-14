@@ -10,7 +10,7 @@ M.create_buf = function()
   -- We should name our buffer. All buffers in vim must have unique names.
   -- The easiest solution will be adding buffer handle to it
   -- because it is already unique and it's just a number.
-  vim.api.nvim_buf_set_name(buf, "Notex" .. buf)
+  vim.api.nvim_buf_set_name(buf, "jira-nvim" .. buf)
 
   -- Now we set some options for our buffer.
   -- nofile prevent mark buffer as modified so we never get warnings about not saved changes.
@@ -24,7 +24,7 @@ M.create_buf = function()
   -- It's not necessary but it is good practice to set custom filetype.
   -- This allows users to create their own autocommand or colorschemes on filetype.
   -- and prevent collisions with other plugins.
-  vim.api.nvim_buf_set_option(buf, "filetype", "jql_result")
+  vim.api.nvim_buf_set_option(buf, "filetype", "jira-nvim")
   -- For better UX we will turn off line wrap and turn on current line highlight.
   vim.api.nvim_win_set_option(win, "wrap", false)
   vim.api.nvim_win_set_option(win, "cursorline", true)
