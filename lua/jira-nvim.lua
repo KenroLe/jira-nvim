@@ -2,6 +2,7 @@ local json = require("deps.json")
 local jira_api = require("jira-api")
 local buf_util = require("buffer-util")
 local M = {}
+M.lines = {}
 M.init = function()
 	local token = os.getenv("jira_api_token")
 	local email = os.getenv("jira_email")
@@ -20,29 +21,6 @@ M.init = function()
 		end
 	end)
 end
-M.test = function()
-	buf = buf_util.create_buf()
-	-- Query for data,
-	local result = jira_api.jql_req(M.opts)
-	-- loop through and insert data into buf_lines
-	local buf_lines = {}
-	for _, issue in pairs(result.issues) do
-		table.insert(buf_lines, issue.key .. " " .. issue.fields.summary)
-	end
-	-- write buf_lines into buffer
-	vim.api.nvim_buf_set_lines(buf, 0, 0, false, buf_lines)
-end
-M.get_issue_by_key = function(key)
-	if key == nil then
-		print("arg is nill!")
-		return
-	end
-	local buf = buf_util.create_buf()
-	local result = jira_api.get_issue_by_key(key, M.opts)
-	local buf_lines = M.issues_to_buf_line_table(result.issues)
-	-- write buf_lines into buffer
-	vim.api.nvim_buf_set_lines(buf, 0, 0, false, buf_lines)
-end
 M.get_issue_by_text = function(text, project)
 	if text == nil then
 		print("arg is nill!")
@@ -56,52 +34,64 @@ M.get_issue_by_text = function(text, project)
 		opts_override.jql = "project=" .. project
 	end
 	local result = jira_api.get_issue_by_text(text, opts_override)
-	local buf_lines = M.issues_to_buf_line_table(result.issues)
+	M.issues_to_buf_line_table(result.issues)
 	-- write buf_lines into buffer
-	vim.api.nvim_buf_set_lines(buf, 0, 0, false, buf_lines)
+	M.render(buf)
 end
 M.issues_to_buf_line_table = function(issues)
-	local buf_lines = {}
 	if issues and issues[1] then
 		for _, issue in pairs(issues) do
-			table.insert(buf_lines, issue.key .. " " .. issue.fields.summary)
+			M.lines[issue.key] = {
+				title = issue.key .. " " .. issue.fields.summary,
+				detail = M.description_to_lines(issue.fields.description),
+				expanded = false,
+			} --
 		end
 	else
-		table.insert(buf_lines, "No issues found!")
+		table.insert(M.lines, "No issues found!")
 	end
-	return buf_lines
 end
-M.expand = function()
-	local buf = vim.api.nvim_get_current_buf()
-	local cursor_pos = vim.api.nvim_win_get_cursor(vim.api.nvim_get_current_win())
-	local current_line = vim.api.nvim_get_current_line()
-	-- close current expansion if it exists
-	if M.expanded then
-		vim.api.nvim_buf_set_lines(buf, M.expanded.line, M.expanded.line + M.expanded.line_count, false, {})
+M.render = function(buf)
+	local buffer_text = {}
+	for _, line in pairs(M.lines) do
+		table.insert(buffer_text, line.title)
+		-- for _, desc_line in pairs(line.detail) do
+		-- 	table.insert(buffer_text, desc_line)
+		-- end
 	end
-	-- get issue key from current line
-	local separator_index = string.find(current_line, " ")
-	local issue_key = string.sub(current_line, 0, separator_index - 1)
-	-- override opts before getting issue info
-	local override_opts = M.opts
-	override_opts.fields = "summary,description"
-	local result = jira_api.get_issue_by_key(issue_key, override_opts)
-	-- parse description (jiras data is filthy complicated!)
-	local desc = json.encode(result.issues[1].fields.description)
-	local lines_to_add = {}
-	for _, content in pairs(result.issues[1].fields.description.content) do
-		if content.type == "paragraph" then
-			for _, paragraph in pairs(content.content) do
-				if paragraph.type == "text" then
-					table.insert(lines_to_add, "  " .. paragraph.text)
+	vim.api.nvim_buf_set_lines(buf, 0, 0, false, buffer_text)
+end
+M.description_to_lines = function(description)
+	local lines = {}
+	if description then
+		for _, content in pairs(description.content) do
+			if content.type == "paragraph" then
+				for _, paragraph in pairs(content.content) do
+					if paragraph.type == "text" then
+						table.insert(lines, paragraph.text)
+					end
 				end
 			end
 		end
+	else
+		table.insert(lines, "No description")
 	end
-	-- set expanded
-	M.expanded = { line = cursor_pos[1], line_count = table.maxn(lines_to_add) }
-	-- write new expanded to buffer!
-	vim.api.nvim_buf_set_lines(buf, cursor_pos[1], cursor_pos[1], false, lines_to_add)
+	return lines
 end
-M.expanded = nil
+M.expand = function()
+	local win = vim.api.nvim_get_current_win()
+	local cursor_pos = vim.api.nvim_win_get_cursor(win)
+	local buf = vim.api.nvim_get_current_buf()
+	local line = vim.api.nvim_get_current_line()
+	local range_end = string.find(line, " ")
+	local issue_key = string.sub(line, 0, range_end - 1)
+	local buffer_text = {}
+	if M.lines[issue_key].expanded == false then
+		for _, detail_line in pairs(M.lines[issue_key].detail) do
+			table.insert(buffer_text, "  " .. detail_line)
+			M.lines[issue_key].expanded = true
+		end
+		vim.api.nvim_buf_set_lines(buf, cursor_pos[1], cursor_pos[1], false, buffer_text)
+	end
+end
 return M
