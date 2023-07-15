@@ -20,6 +20,13 @@ M.init = function()
 			M.expand()
 		end
 	end)
+	vim.keymap.set("n", "c", function()
+		local buf = vim.api.nvim_get_current_buf()
+		local ft = vim.api.nvim_buf_get_option(buf, "filetype")
+		if ft == "jira-nvim" then
+			M.close()
+		end
+	end)
 end
 M.get_issue_by_text = function(text, project)
 	if text == nil then
@@ -55,9 +62,6 @@ M.render = function(buf)
 	local buffer_text = {}
 	for _, line in pairs(M.lines) do
 		table.insert(buffer_text, line.title)
-		-- for _, desc_line in pairs(line.detail) do
-		-- 	table.insert(buffer_text, desc_line)
-		-- end
 	end
 	vim.api.nvim_buf_set_lines(buf, 0, 0, false, buffer_text)
 end
@@ -92,6 +96,19 @@ M.expand = function()
 			M.lines[issue_key].expanded = true
 		end
 		vim.api.nvim_buf_set_lines(buf, cursor_pos[1], cursor_pos[1], false, buffer_text)
+	end
+end
+M.close = function()
+	local win = vim.api.nvim_get_current_win()
+	local cursor_pos = vim.api.nvim_win_get_cursor(win)
+	local buf = vim.api.nvim_get_current_buf()
+	local line = vim.api.nvim_get_current_line()
+	local range_end = string.find(line, " ")
+	local issue_key = string.sub(line, 0, range_end - 1)
+	if M.lines[issue_key].expanded == true then
+		local detail_len = #M.lines[issue_key].detail
+		vim.api.nvim_buf_set_lines(buf, cursor_pos[1], cursor_pos[1] + detail_len, false, {})
+		M.lines[issue_key].expanded = false
 	end
 end
 return M
