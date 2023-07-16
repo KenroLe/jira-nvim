@@ -1,6 +1,6 @@
 local json = require("deps.json")
 local jira_api = require("jira-api")
-local buf_util = require("buffer-util")
+local buf_handle = require("buffer")
 local M = {}
 M.lines = {}
 M.init = function()
@@ -34,7 +34,7 @@ M.get_issue_by_text = function(text, project)
 		return
 	end
 	print(project)
-	local buf = buf_util.create_buf()
+	local buf = buf_handle.get_buf()
 	local opts_override = M.opts
 	opts_override.fields = "summary,description"
 	if project then
