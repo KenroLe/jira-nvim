@@ -44,8 +44,8 @@ M.get_issue_by_text = function(text, project)
 	end
 	local buf = buf_handle.get_buf()
 	M.buf[buf] = { issues = {} }
-	M.opts.fields = "summary,description"
-	local result = jira_api.get_issue(text, project, M.opts)
+	local fields = "summary,description"
+	local result = jira_api.get_issue({ text = text, project = project }, fields, M.opts)
 	M.issues_to_buf_line_table(result.issues, buf)
 	-- write buf_lines into buffer
 	M.render(buf)

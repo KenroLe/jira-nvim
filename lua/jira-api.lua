@@ -20,15 +20,20 @@ M.jql_req = function(jql, url, api_key, email, fields)
 	})
 	return json.decode(res.body)
 end
-M.get_issue = function(text, project, opts)
+-- search_opts = {
+--    text:string,
+--    project:string
+-- }
+-- fields = string
+M.get_issue = function(search_opts, fields, opts)
 	local jql = ""
-	if text then
-		jql = jql .. "text~ " .. text
+	if search_opts.text then
+		jql = jql .. "text~ " .. search_opts.text
 	end
-	if project then
-		jql = jql .. " AND project =" .. project
+	if search_opts.project then
+		jql = jql .. " AND project =" .. search_opts.project
 	end
-	return M.jql_req(jql, opts.url, opts.api_key, opts.email, opts.fields)
+	return M.jql_req(jql, opts.url, opts.api_key, opts.email, fields)
 end
 M.url_encode_spaces = function(url)
 	return string.gsub(url, " ", "%%20")
