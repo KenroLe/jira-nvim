@@ -76,7 +76,7 @@ M.expand = function()
 	local issue_key = string.sub(line, 0, range_end - 1)
 	local buffer_text = {}
 	if M.buf[buf].issues[issue_key].expanded == false then
-		jira_description_handler.write_description_to_buf(
+		jira_description_handler.write_description(
 			buf,
 			cursor_pos[1],
 			M.buf[buf].issues[issue_key].fields.description,

@@ -14,10 +14,9 @@ M.write_emoji = function(buf, paragraph_row, col, inner_content)
 end
 M.write_mention = function(buf, paragraph_row, col, inner_content, hl_ns)
   vim.api.nvim_buf_set_text(buf, paragraph_row, col, paragraph_row, col, { inner_content.attrs.text })
-  print("column=", col, col + string.len(inner_content.attrs.text))
   vim.api.nvim_buf_add_highlight(buf, hl_ns, "String", paragraph_row, col, col + string.len(inner_content.attrs.text))
 end
-M.write_description_to_buf = function(buf, row, description, namespace)
+M.write_description = function(buf, row, description, namespace)
   local lines = {}
   local row_offset = 0
   if description then
