@@ -70,30 +70,46 @@ M.write_description_to_buf = function(buf, row, description)
 	local lines = {}
 	local row_offset = 0
 	if description then
-		for _, paragraph in ipairs(description.content) do
-			if paragraph.type == "paragraph" then
+		for _, outer_content in ipairs(description.content) do
+			if outer_content.type == "paragraph" then
 				local paragraph_row = row + row_offset
 				vim.api.nvim_buf_set_lines(buf, paragraph_row, paragraph_row, false, { "" })
 				row_offset = row_offset + 1
 				local col = 0
-				for _, content in ipairs(paragraph.content) do
-					if content.type == "text" then
-						vim.api.nvim_buf_set_text(buf, paragraph_row, col, paragraph_row, col, { content.text })
-						if content.marks ~= nil then
-							for _, mark in ipairs(content.marks) do
-								if mark.type == "link" then
-									vim.api.nvim_buf_add_highlight(
-										buf,
-										M.namespace,
-										"String",
-										row + row_offset - 1,
-										col,
-										col + string.len(content.text)
-									)
-								end
-							end
-						end
-						col = col + string.len(content.text)
+				for _, inner_content in ipairs(outer_content.content) do
+					if inner_content.type == "text" then
+						require("jira-description").write_desc_text(buf, paragraph_row, col, inner_content)
+						col = col + string.len(inner_content.text)
+					end
+					if inner_content.type == "emoji" then
+						vim.api.nvim_buf_set_text(
+							buf,
+							paragraph_row,
+							col,
+							paragraph_row,
+							col,
+							{ inner_content.attrs.text }
+						)
+						col = col + string.len(inner_content.attrs.text)
+					end
+					if inner_content.type == "mention" then
+						vim.api.nvim_buf_set_text(
+							buf,
+							paragraph_row,
+							col,
+							paragraph_row,
+							col,
+							{ inner_content.attrs.text }
+						)
+						vim.api.nvim_buf_add_highlight(
+							buf,
+							M.namespace,
+							"String",
+							row + row_offset - 1,
+							col,
+							col + string.len(inner_content.attrs.text)
+						)
+						col = col + string.len(inner_content.attrs.text)
 					end
 				end
 			end
