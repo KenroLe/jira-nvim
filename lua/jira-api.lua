@@ -9,29 +9,28 @@ local M = {}
 --    fields = string,
 --    jql = string (optional),
 -- }
-M.jql_req = function(opts)
-	local auth = opts.email .. ":" .. opts.api_key
-	if opts.jql == nil then
-		opts.jql = ""
-	end
+M.jql_req = function(jql, url, api_key, email, fields)
+	print(M.url_encode_spaces(url .. "/rest/api/3/search?fields=" .. fields .. "&jql=" .. jql))
+	local auth = email .. ":" .. api_key
 	local res = curl.request({
 		request = "GET",
-		url = opts.url .. "/rest/api/3/search?fields=" .. opts.fields .. "&jql=" .. opts.jql,
+		url = M.url_encode_spaces(url .. "/rest/api/3/search?fields=" .. fields .. "&jql=" .. jql),
 		accept = "application/json",
 		auth = auth,
-		output = opts.output,
 	})
 	return json.decode(res.body)
 end
-M.get_issue_by_key = function(key, opts)
-	opts.jql = "key=" .. key
-	return M.jql_req(opts)
-end
-M.get_issue_by_text = function(text, opts)
-	if opts.jql == nil then
-		opts.jql = ""
+M.get_issue = function(text, project, opts)
+	local jql = ""
+	if text then
+		jql = jql .. "text~ " .. text
 	end
-	opts.jql = opts.jql .. "text~" .. text
-	return M.jql_req(opts)
+	if project then
+		jql = jql .. " AND project =" .. project
+	end
+	return M.jql_req(jql, opts.url, opts.api_key, opts.email, opts.fields)
+end
+M.url_encode_spaces = function(url)
+	return string.gsub(url, " ", "%%20")
 end
 return M

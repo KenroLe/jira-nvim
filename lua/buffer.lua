@@ -26,7 +26,7 @@ M.get_buf = function()
 	-- and prevent collisions with other plugins.
 	vim.api.nvim_buf_set_option(buf, "filetype", "jira-nvim")
 	-- For better UX we will turn off line wrap and turn on current line highlight.
-	vim.api.nvim_win_set_option(win, "wrap", false)
+	vim.api.nvim_win_set_option(win, "wrap", true)
 	vim.api.nvim_win_set_option(win, "cursorline", true)
 	return buf
 end
