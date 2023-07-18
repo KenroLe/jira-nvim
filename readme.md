@@ -1,5 +1,17 @@
 i wrote this in autopilot
 
+planned features:
+
+modify description
+
+read and edit comments
+
+custom fields?
+
+storypoints!
+
+support more commands and query options
+
 REQUIREMENTS!
 plenary
 curl
