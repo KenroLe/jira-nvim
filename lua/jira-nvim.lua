@@ -55,7 +55,7 @@ M.issues_to_buf_line_table = function(issues, buf)
 		for _, issue in pairs(issues) do
 			print(issue.key)
 			M.buf[buf].issues[issue.key] = issue
-			M.buf[buf].issues[issue.key].expanded = false
+			M.buf[buf].issues[issue.key].expanded = nil
 		end
 	else
 		table.insert(M.buf[buf].lines, "No issues found!")
@@ -74,14 +74,14 @@ M.expand = function()
 	local line = vim.api.nvim_get_current_line()
 	local range_end = string.find(line, " ")
 	local issue_key = string.sub(line, 0, range_end - 1)
-	local buffer_text = {}
-	if M.buf[buf].issues[issue_key].expanded == false then
-		jira_description_handler.write_description(
+	if M.buf[buf].issues[issue_key].expanded == nil then
+		local lines_added_len = jira_description_handler.write_description(
 			buf,
 			cursor_pos[1],
 			M.buf[buf].issues[issue_key].fields.description,
 			M.namespace
 		)
+		M.buf[buf].issues[issue_key].expanded = lines_added_len
 	end
 end
 M.close = function()
@@ -91,10 +91,6 @@ M.close = function()
 	local line = vim.api.nvim_get_current_line()
 	local range_end = string.find(line, " ")
 	local issue_key = string.sub(line, 0, range_end - 1)
-	if M.buf[buf].lines[issue_key].expanded == true then
-		local detail_len = #M.buf[buf].lines[issue_key].detail
-		vim.api.nvim_buf_set_lines(buf, cursor_pos[1], cursor_pos[1] + detail_len, false, {})
-		M.buf[buf].lines[issue_key].expanded = false
-	end
+	jira_description_handler.remove_description(buf, cursor_pos[1], M.buf[buf].issues[issue_key])
 end
 return M
