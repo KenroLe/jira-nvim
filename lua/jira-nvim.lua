@@ -52,43 +52,49 @@ end
 M.issues_to_buf_line_table = function(issues, buf)
 	if issues and issues[1] then
 		for _, issue in pairs(issues) do
-			M.buf[buf].issues[issue.key] = {
-				title = issue.key .. " " .. issue.fields.summary,
-				detail = M.description_to_lines(issue.fields.description),
-				expanded = false,
-			} --
+			print(issue.key)
+			M.buf[buf].issues[issue.key] = issue
+			M.buf[buf].issues[issue.key].expanded = false
 		end
 	else
 		table.insert(M.buf[buf].lines, "No issues found!")
 	end
 end
 M.render = function(buf)
-	for _, line in pairs(M.buf[buf].issues) do
-		vim.api.nvim_buf_set_lines(buf, 0, 0, false, { line.title })
+	for _, issue in pairs(M.buf[buf].issues) do
+		vim.api.nvim_buf_set_lines(buf, 0, 0, false, { issue.key .. " " .. issue.fields.summary })
 		vim.api.nvim_buf_set_extmark(buf, M.namespace, 0, 0, { end_row = 1, hl_group = "Title" })
 	end
 end
-M.description_to_lines = function(description)
+M.write_description_to_buf = function(buf, row, description)
 	local lines = {}
+	local row_offset = 0
 	if description then
-		for _, paragraph in pairs(description.content) do
+		for _, paragraph in ipairs(description.content) do
 			if paragraph.type == "paragraph" then
-				local line = ""
-				local url = nil
-				for _, content in pairs(paragraph.content) do
+				local paragraph_row = row + row_offset
+				vim.api.nvim_buf_set_lines(buf, paragraph_row, paragraph_row, false, { "" })
+				row_offset = row_offset + 1
+				local col = 0
+				for _, content in ipairs(paragraph.content) do
 					if content.type == "text" then
-						line = line .. content.text
-					elseif content.marks ~= nil then
-						for _, mark in pairs(content.marks) do
-							if mark.type == "link" then
-								url = mark.attrs.href
+						vim.api.nvim_buf_set_text(buf, paragraph_row, col, paragraph_row, col, { content.text })
+						if content.marks ~= nil then
+							for _, mark in ipairs(content.marks) do
+								if mark.type == "link" then
+									vim.api.nvim_buf_add_highlight(
+										buf,
+										M.namespace,
+										"String",
+										row + row_offset - 1,
+										col,
+										col + string.len(content.text)
+									)
+								end
 							end
 						end
+						col = col + string.len(content.text)
 					end
-				end
-				table.insert(lines, line)
-				if url then
-					table.insert(lines, "^^ URL:" .. url)
 				end
 			end
 		end
@@ -106,18 +112,7 @@ M.expand = function()
 	local issue_key = string.sub(line, 0, range_end - 1)
 	local buffer_text = {}
 	if M.buf[buf].issues[issue_key].expanded == false then
-		for _, detail_line in pairs(M.buf[buf].issues[issue_key].detail) do
-			table.insert(buffer_text, "  " .. detail_line)
-			M.buf[buf].issues[issue_key].expanded = true
-		end
-		vim.api.nvim_buf_set_lines(buf, cursor_pos[1], cursor_pos[1], false, buffer_text)
-		vim.api.nvim_buf_set_extmark(
-			buf,
-			M.namespace,
-			cursor_pos[1],
-			0,
-			{ end_row = cursor_pos[1] + table.maxn(buffer_text), hl_group = "String" }
-		)
+		M.write_description_to_buf(buf, cursor_pos[1], M.buf[buf].issues[issue_key].fields.description)
 	end
 end
 M.close = function()
