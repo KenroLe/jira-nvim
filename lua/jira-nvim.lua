@@ -3,14 +3,13 @@ local buf_handle = require("buffer")
 local jira_description_handler = require("jira-description")
 local customfields = require("customfields")
 local json = require("deps.json")
+local ns_provider = require("namespace-provider")
 local M = {}
 M.buf = {}
-M.namespace = nil
 M.init = function(opts)
 	local token = os.getenv("jira_api_token")
 	local email = os.getenv("jira_email")
 	local url = os.getenv("jira_url")
-	M.namespace = vim.api.nvim_create_namespace("jira-nvim")
 	M.opts = {
 		url = url,
 		email = email,
@@ -80,7 +79,7 @@ M.render = function(buf)
 		-- 	.. " "
 		-- 	.. issue.fields.summary,
 		-- })
-		vim.api.nvim_buf_set_extmark(buf, M.namespace, 0, 0, { end_row = 1, hl_group = "Title" })
+		vim.api.nvim_buf_set_extmark(buf, ns_provider.get_ns(), 0, 0, { end_row = 1, hl_group = "Title" })
 	end
 end
 M.expand = function()
@@ -94,8 +93,7 @@ M.expand = function()
 		local lines_added_len = jira_description_handler.write_description(
 			buf,
 			cursor_pos[1],
-			M.buf[buf].issues[issue_key].fields.description,
-			M.namespace
+			M.buf[buf].issues[issue_key].fields.description
 		)
 		M.buf[buf].issues[issue_key].expanded = lines_added_len
 	end
