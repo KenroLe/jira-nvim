@@ -87,7 +87,6 @@ M.write_description = function(buf, row, description)
 				row_offset = row_offset + M.write_paragraph(outer_content, buf, row + row_offset)
 			end
 			if outer_content.type == "codeBlock" then
-				codeblock.display_codeblock_new_buf(outer_content)
 				row_offset = row_offset + codeblock.write_codeblock(buf, outer_content, row + row_offset)
 			end
 			if outer_content.type == "bulletList" then

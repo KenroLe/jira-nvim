@@ -4,6 +4,7 @@ local jira_description_handler = require("jira-description")
 local customfields = require("customfields")
 local json = require("deps.json")
 local ns_provider = require("namespace-provider")
+local codeblock = require("codeblock")
 local M = {}
 M.buf = {}
 M.init = function(opts)
@@ -23,12 +24,18 @@ M.init = function(opts)
 			M.expand()
 		end
 	end)
-	vim.keymap.set("n", "c", function()
+	vim.keymap.set("n", "x", function()
 		local buf = vim.api.nvim_get_current_buf()
 		local ft = vim.api.nvim_buf_get_option(buf, "filetype")
 		if ft == "jira-nvim" then
 			M.close()
 		end
+	end)
+	vim.keymap.set("n", "c", function()
+		local buf = vim.api.nvim_get_current_buf()
+		local extmark = require("utils.extmarks").get_extmark_at_cursor(buf, ns_provider.get_codeblock_ns())
+		local codeblock_content = codeblock.get_codeblock(buf, extmark[1])
+		codeblock.display_codeblock_new_buf(codeblock_content)
 	end)
 end
 M.get_issue_by_text = function(text, project)
