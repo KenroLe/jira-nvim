@@ -53,7 +53,6 @@ end
 M.write_bullet_list = function(bullet_list, buf, row, namespace)
   local lines_added = 0
   for _, list_item in ipairs(bullet_list.content) do
-    print("bullet_point")
     lines_added = lines_added + M.write_list_item(list_item, buf, row + lines_added, namespace)
   end
   return lines_added
@@ -61,11 +60,9 @@ end
 -- returns number of lines added
 M.write_list_item = function(list_item, buf, row, namespace)
   local lines_added = 0
-  print("lines_added", lines_added)
   for _, content in ipairs(list_item.content) do
     lines_added = lines_added + M.write_paragraph(content, buf, row + lines_added, namespace)
   end
-  print("lines_added", lines_added)
   return lines_added
 end
 -- returns number of rows added

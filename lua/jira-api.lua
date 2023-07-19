@@ -10,7 +10,6 @@ local M = {}
 --    jql = string (optional),
 -- }
 M.jql_req = function(jql, url, api_key, email, fields)
-	print(M.url_encode_spaces(url .. "/rest/api/3/search?fields=" .. fields .. "&jql=" .. jql))
 	local auth = email .. ":" .. api_key
 	local res = curl.request({
 		request = "GET",

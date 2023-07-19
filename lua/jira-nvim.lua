@@ -2,15 +2,6 @@ local jira_api = require("jira-api")
 local buf_handle = require("buffer")
 local jira_description_handler = require("jira-description")
 local M = {}
--- [
---    Issues : {
---    	IssueKey : {
---    		title:string,
---    		detail_line:{hl_group:string, text:string},
---        expanded:bool
---    	}
---    }
--- [
 M.buf = {}
 M.namespace = nil
 M.init = function()
