@@ -1,5 +1,6 @@
 local string_util = require("utils.string-util")
-M = {}
+local codeblock = require("codeblock")
+local M = {}
 M.write_desc_text = function(buf, paragraph_row, col, desc, hl_ns)
 	vim.api.nvim_buf_set_text(buf, paragraph_row, col, paragraph_row, col, { desc.text })
 	if desc.marks ~= nil then
@@ -47,14 +48,6 @@ M.write_paragraph = function(paragraph, buf, row, namespace)
 	end
 	return lines_added
 end
-M.display_codeblocks = function(code_block)
-	vim.api.nvim_command("new")
-	local buf = vim.api.nvim_get_current_buf()
-	vim.api.nvim_buf_set_option(buf, "filetype", code_block.attrs.language)
-	for _, content in ipairs(code_block.content) do
-		vim.api.nvim_buf_set_lines(buf, 0, 0, false, string_util.split(content.text, "\n"))
-	end
-end
 M.write_bullet_list = function(bullet_list, buf, row, namespace)
 	local lines_added = 0
 	for _, list_item in ipairs(bullet_list.content) do
@@ -79,7 +72,8 @@ M.write_description = function(buf, row, description, namespace)
 				row_offset = row_offset + M.write_paragraph(outer_content, buf, row + row_offset, namespace)
 			end
 			if outer_content.type == "codeBlock" then
-				M.display_codeblocks(outer_content)
+				codeblock.display_codeblock_new_buf(outer_content)
+				row_offset = row_offset + codeblock.write_codeblock(buf, outer_content, row + row_offset)
 			end
 			if outer_content.type == "bulletList" then
 				row_offset = row_offset + M.write_bullet_list(outer_content, buf, row + row_offset, namespace)
