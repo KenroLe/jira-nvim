@@ -1,6 +1,7 @@
 local string_util = require("utils.string-util")
 local ns_provider = require("namespace-provider")
 local codeblock = require("codeblock")
+local extmark_util = require("utils.extmarks")
 local M = {}
 M.write_desc_text = function(buf, paragraph_row, col, desc)
 	vim.api.nvim_buf_set_text(buf, paragraph_row, col, paragraph_row, col, { desc.text })
@@ -98,6 +99,7 @@ M.write_description = function(buf, row, description)
 end
 M.remove_description = function(buf, row, issue)
 	if issue.expanded ~= nil then
+		extmark_util.del_extmarks_in_range(buf, ns_provider.get_codeblock_ns(), row, row + issue.expanded)
 		vim.api.nvim_buf_set_lines(buf, row, row + issue.expanded, false, {})
 		issue.expanded = nil
 	end
