@@ -1,14 +1,6 @@
 local curl = require("plenary.curl")
 local json = require("deps.json")
 local M = {}
--- example opts:
--- opts {
---    url = string, https/http protocol included!
---    email = string,
---    api_key = string,
---    fields = string,
---    jql = string (optional),
--- }
 M.jql_req = function(jql, url, api_key, email, fields)
 	local auth = email .. ":" .. api_key
 	local res = curl.request({
@@ -19,11 +11,6 @@ M.jql_req = function(jql, url, api_key, email, fields)
 	})
 	return json.decode(res.body)
 end
--- search_opts = {
---    text:string,
---    project:string
--- }
--- fields = string
 M.get_issue = function(search_opts, fields, opts)
 	local jql = ""
 	if search_opts.text then
