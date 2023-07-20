@@ -7,6 +7,7 @@ M.display_codeblock_new_buf = function(code_block)
 	vim.api.nvim_command("new")
 	local buf = vim.api.nvim_get_current_buf()
 	vim.api.nvim_buf_set_option(buf, "filetype", code_block.attrs.language)
+	vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
 	for _, content in ipairs(code_block.content) do
 		vim.api.nvim_buf_set_lines(buf, 0, 0, false, string_util.split(content.text, "\n"))
 	end

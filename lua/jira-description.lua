@@ -35,13 +35,20 @@ M.write_mention = function(buf, paragraph_row, col, inner_content)
 	)
 end
 -- returns the number of lines added
-M.write_paragraph = function(paragraph, buf, row)
+-- opts {
+-- 		prefix = String, string to prefix to every paragraph line
+-- }
+M.write_paragraph = function(paragraph, buf, row, opts)
 	local lines_added = 0
 	if paragraph.type == "paragraph" then
+		local prefix = ""
+		if opts and opts.prefix then
+			prefix = opts.prefix
+		end
 		-- create a new row for the paragraph
-		vim.api.nvim_buf_set_lines(buf, row, row, false, { "" })
+		vim.api.nvim_buf_set_lines(buf, row, row, false, { prefix })
 		lines_added = lines_added + 1
-		local col = 0
+		local col = string.len(prefix)
 		for _, inner_content in ipairs(paragraph.content) do
 			if inner_content.type == "text" then
 				M.write_desc_text(buf, row, col, inner_content)
@@ -56,9 +63,14 @@ M.write_paragraph = function(paragraph, buf, row)
 				col = col + string.len(inner_content.attrs.text)
 			end
 			if inner_content.type == "hardBreak" then
-				vim.api.nvim_buf_set_lines(buf, row, row, false, { "" })
+				local hb_prefix = ""
+				for i = 1, string.len(prefix), 1 do
+					hb_prefix = hb_prefix .. " "
+				end
+				print("hb_prefix", string.len(hb_prefix), " ", string.len(prefix))
+				vim.api.nvim_buf_set_lines(buf, row, row, false, { hb_prefix })
 				lines_added = lines_added + 1
-				col = 0
+				col = string.len(hb_prefix)
 			end
 		end
 	end
@@ -75,7 +87,7 @@ end
 M.write_list_item = function(list_item, buf, row)
 	local lines_added = 0
 	for _, content in ipairs(list_item.content) do
-		lines_added = lines_added + M.write_paragraph(content, buf, row + lines_added)
+		lines_added = lines_added + M.write_paragraph(content, buf, row + lines_added, { prefix = " - " })
 	end
 	return lines_added
 end
