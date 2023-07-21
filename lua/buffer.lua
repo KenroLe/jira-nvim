@@ -1,4 +1,5 @@
 local M = {}
+local buffer_keymaps = require("buffer_keymaps")
 M.get_buf = function()
 	-- We save handle to window from which we open the navigation
 	local start_win = vim.api.nvim_get_current_win()
@@ -25,9 +26,9 @@ M.get_buf = function()
 	-- This allows users to create their own autocommand or colorschemes on filetype.
 	-- and prevent collisions with other plugins.
 	vim.api.nvim_buf_set_option(buf, "filetype", "jira-nvim")
-	-- For better UX we will turn off line wrap and turn on current line highlight.
 	vim.api.nvim_win_set_option(win, "wrap", true)
 	vim.api.nvim_win_set_option(win, "cursorline", true)
+	buffer_keymaps.set_mappings()
 	return buf
 end
 return M
