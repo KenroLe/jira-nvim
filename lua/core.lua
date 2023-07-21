@@ -13,11 +13,11 @@ M.get_issue_by_text = function(text, project)
 	M.buf[buf] = { issues = {} }
 	local fields = "summary,description," .. customfields.get_storypoint_customfield()
 	local result = jira_api.get_issue({ text = text, project = project }, fields, M.opts)
-	M.issues_to_buf_line_table(result.issues, buf)
+	M.store_issues(result.issues, buf)
 	-- write buf_lines into buffer
 	M.render(buf)
 end
-M.issues_to_buf_line_table = function(issues, buf)
+M.store_issues = function(issues, buf)
 	if issues and issues[1] then
 		for _, issue in pairs(issues) do
 			M.buf[buf].issues[issue.key] = issue
