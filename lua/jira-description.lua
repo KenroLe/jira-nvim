@@ -46,7 +46,7 @@ M.write_paragraph = function(paragraph, buf, row, opts)
 			prefix = opts.prefix
 		end
 		-- create a new row for the paragraph
-		vim.api.nvim_buf_set_lines(buf, row, row, false, { prefix })
+		vim.api.nvim_buf_set_lines(buf, row, row, true, { prefix })
 		lines_added = lines_added + 1
 		local col = string.len(prefix)
 		for _, inner_content in ipairs(paragraph.content) do
@@ -68,7 +68,7 @@ M.write_paragraph = function(paragraph, buf, row, opts)
 					hb_prefix = hb_prefix .. " "
 				end
 				print("hb_prefix", string.len(hb_prefix), " ", string.len(prefix))
-				vim.api.nvim_buf_set_lines(buf, row, row, false, { hb_prefix })
+				vim.api.nvim_buf_set_lines(buf, row, row, true, { hb_prefix })
 				lines_added = lines_added + 1
 				col = string.len(hb_prefix)
 			end
@@ -112,7 +112,7 @@ end
 M.remove_description = function(buf, row, issue)
 	if issue.expanded ~= nil then
 		extmark_util.del_extmarks_in_range(buf, ns_provider.get_codeblock_ns(), row, row + issue.expanded)
-		vim.api.nvim_buf_set_lines(buf, row, row + issue.expanded, false, {})
+		vim.api.nvim_buf_set_lines(buf, row, row + issue.expanded, true, {})
 		issue.expanded = nil
 	end
 end

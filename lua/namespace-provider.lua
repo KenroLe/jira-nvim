@@ -26,4 +26,13 @@ M.get_bulletpoint_ns = function()
 		return M.bp_ns
 	end
 end
+M.lm_ns = nil
+M.get_loadmore_ns = function()
+	if M.lm_ns then
+		return M.lm_ns
+	else
+		M.lm_ns = vim.api.nvim_create_namespace("jira-nvim-loadmore-namespace")
+		return M.lm_ns
+	end
+end
 return M

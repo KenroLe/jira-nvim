@@ -24,15 +24,17 @@ M.set_mappings = function()
 		local ft = vim.api.nvim_buf_get_option(buf, "filetype")
 		if ft == "jira-nvim" then
 			local extmark = require("utils.extmarks").get_extmark_at_cursor(buf, ns_provider.get_codeblock_ns())
-			local codeblock_content = nil
 			if extmark then
-				codeblock_content = codeblock.get_codeblock(buf, extmark[1])
-			end
-			if codeblock_content == nil then
-				core.expand()
+				local codeblock_content = codeblock.get_codeblock(buf, extmark[1])
+				codeblock.display_codeblock_new_buf(codeblock_content)
 				return
 			end
-			codeblock.display_codeblock_new_buf(codeblock_content)
+			local extmark = require("utils.extmarks").get_extmark_at_cursor(buf, ns_provider.get_loadmore_ns())
+			if extmark then
+				core.load_more()
+				return
+			end
+			core.expand()
 		end
 	end, { buffer = true, noremap = true })
 	vim.keymap.set("n", "b", function()

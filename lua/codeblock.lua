@@ -11,13 +11,13 @@ M.display_codeblock_new_buf = function(code_block)
 	vim.api.nvim_buf_set_option(buf, "swapfile", false)
 	vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
 	for _, content in ipairs(code_block.content) do
-		vim.api.nvim_buf_set_lines(buf, 0, 0, false, string_util.split(content.text, "\n"))
+		vim.api.nvim_buf_set_lines(buf, 0, 0, true, string_util.split(content.text, "\n"))
 	end
 end
 -- returns number of lines created
 M.write_codeblock = function(buf, code_block, row)
 	for _, content in ipairs(code_block.content) do
-		vim.api.nvim_buf_set_lines(buf, row, row, false, { "Codeblock" })
+		vim.api.nvim_buf_set_lines(buf, row, row, true, { "Codeblock" })
 		local lines = string_util.split(content.text, "\n")
 		local virt_text_lines = {}
 		for _, v in ipairs(lines) do
