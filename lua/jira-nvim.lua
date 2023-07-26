@@ -1,5 +1,5 @@
 local customfields = require("customfields")
-local core = require("core")
+local core = require("issue-list.issue-list")
 local M = {}
 M.init = function(opts)
 	local token = os.getenv("jira_api_token")

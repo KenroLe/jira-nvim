@@ -2,16 +2,8 @@ local ns_provider = require("namespace-provider")
 local codeblock = require("codeblock")
 local M = {}
 M.set_mappings = function()
-	-- vim.keymap.set("n", "e", function()
-	--   local core = require("core")
-	--   local buf = vim.api.nvim_get_current_buf()
-	--   local ft = vim.api.nvim_buf_get_option(buf, "filetype")
-	--   if ft == "jira-nvim" then
-	--     core.expand()
-	--   end
-	-- end, { buffer = true, noremap = true })
 	vim.keymap.set("n", "x", function()
-		local core = require("core")
+		local core = require("issue-list.issue-list")
 		local buf = vim.api.nvim_get_current_buf()
 		local ft = vim.api.nvim_buf_get_option(buf, "filetype")
 		if ft == "jira-nvim" then
@@ -19,7 +11,7 @@ M.set_mappings = function()
 		end
 	end, { buffer = true, noremap = true })
 	vim.keymap.set("n", "e", function()
-		local core = require("core")
+		local core = require("issue-list.issue-list")
 		local buf = vim.api.nvim_get_current_buf()
 		local ft = vim.api.nvim_buf_get_option(buf, "filetype")
 		if ft == "jira-nvim" then
@@ -38,7 +30,7 @@ M.set_mappings = function()
 		end
 	end, { buffer = true, noremap = true })
 	vim.keymap.set("n", "b", function()
-		local core = require("core")
+		local core = require("issue-list.issue-list")
 		core.load_more()
 	end)
 end

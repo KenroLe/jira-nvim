@@ -26,7 +26,11 @@ M.write_codeblock = function(buf, code_block, row)
 		local extmark_id = vim.api.nvim_buf_set_extmark(buf, ns_provider.get_codeblock_ns(), row, 0, { --
 			end_row = row,
 			hl_group = "Title",
-			virt_text = { { code_block.attrs.language }, { "codeblock", "Title" } },
+			virt_text = {
+				{ "e to open in new buffer ", "NvimNumber" },
+				{ code_block.attrs.language },
+				{ "codeblock",                "Title" },
+			},
 			virt_text_pos = "right_align",
 			virt_lines = virt_text_lines,
 		})

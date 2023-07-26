@@ -53,7 +53,13 @@ M.render = function(buf, issues, row)
 			vim.api.nvim_buf_set_text(buf, row, end_col_index, row, end_col_index, { tmp_text })
 			end_col_index = end_col_index + string.len(tmp_text)
 		end
-		vim.api.nvim_buf_set_extmark(buf, ns_provider.get_ns(), row, 0, { end_row = row + 1, hl_group = "Title" })
+		vim.api.nvim_buf_set_extmark(
+			buf,
+			ns_provider.get_ns(),
+			row,
+			0,
+			{ end_row = row + 1, hl_group = "Title", virt_text = { { "e to toggle" } }, virt_text_pos = "right_align" }
+		)
 		row = row + 1
 	end
 end
@@ -63,7 +69,7 @@ M.insert_loadmore_at_eof = function(buf, range_start, range_end, number_of_issue
 		vim.api.nvim_buf_line_count(buf),
 		vim.api.nvim_buf_line_count(buf),
 		true,
-		{ "Load more " .. range_start .. "-" .. range_end .. " of " .. number_of_issues }
+		{ range_start .. "-" .. range_end .. " of " .. number_of_issues }
 	)
 	-- set load_more extmark at last line
 	vim.api.nvim_buf_set_extmark(buf, ns_provider.get_loadmore_ns(), vim.api.nvim_buf_line_count(buf) - 1, 0, {
